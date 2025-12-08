@@ -1,5 +1,7 @@
-import SearchView from "../components/searchView";
+import SearchView from "../components/search/searchView";
 import { useState, useRef, useEffect } from "react"
+import {UserCircle, Heart, ShoppingCart} from 'lucide-react';
+import ProductList from '../components/products/productList'
 export default function MainLayout(){
     const [isSearching, setIsSearching] = useState(false);
     const containerRef = useRef(null); // chứa input + search view
@@ -39,7 +41,7 @@ export default function MainLayout(){
                     <a href="">Kid</a>
                  </div>
                 <div className="text-4xl">
-                        Logo
+                        P.Style
                 </div>
                 <div className={`mr-25 flex gap-x-5 
                     transition-all duration-500 ease-in-out transform ${
@@ -47,9 +49,9 @@ export default function MainLayout(){
                         ? "opacity-0 -translate-y-5 pointer-events-none"
                         : "opacity-100 translate-y-0"
                     }`}>
-                    <a href="">Cart</a>
-                    <a href="">Wishlist</a>
-                    <a href="">Profile</a>
+                    <a href=""><ShoppingCart></ShoppingCart></a>
+                    <a href=""><Heart></Heart></a>
+                    <a href=""><UserCircle className=""></UserCircle></a>
                 </div>
             </nav>
             <nav className="flex  shadow-sm font-serif">
@@ -72,7 +74,7 @@ export default function MainLayout(){
                 <div className={`mr-20 flex items-center ${isSearching ? "mr-20 flex items-start" : "mr-20 flex items-center"} `}ref={containerRef}>
                     <input id='search' type="search" placeholder="What are you looking for?" 
                     className={` focus:outline-none border-b-1 pl-5 mb-1
-                    max-h-40 focus:border-b-2 ${isSearching ? "w-100 transition-all ease-in-out transform" :"w-60"}
+                    max-h-40 focus:border-b-1 ${isSearching ? "w-100 transition-all ease-in-out transform" :"w-60"}
                     `}
                     onFocus={() => setIsSearching(true)}
                     />
@@ -80,6 +82,7 @@ export default function MainLayout(){
                 
                 
             </nav>
+            <ProductList/>
            
         </main>
     )
