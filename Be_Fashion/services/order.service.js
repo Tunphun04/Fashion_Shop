@@ -195,29 +195,30 @@ class OrderService {
 
     // Start transaction
     const connection = await db.getConnection();
-    await connection.beginTransaction();
-
+    
     try {
-      // Update order status
-      await Order.updateStatus(orderId, 'cancelled');
+      await connection.beginTransaction();
 
-      // Restore stock
+      // Update order status using connection
+      await Order.updateStatus(orderId, 'cancelled', connection);
+
+      // Restore stock for all items
       for (const item of order.items) {
-        await connection.query(
-          'UPDATE product_variants SET stock = stock + ? WHERE variant_id = ?',
-          [item.quantity, item.variant_id]
-        );
+        // Increase stock
+        await Order.increaseStock(item.variant_id, item.quantity, connection);
         
-        // Log inventory
-        await Order.logInventory(
+        // Log inventory import
+        await Order.logInventoryImport(
           item.variant_id,
           item.quantity,
-          `Order #${orderId} cancelled - Stock restored`
+          `Order #${orderId} cancelled - Stock restored`,
+          connection
         );
       }
 
       await connection.commit();
 
+      // Get updated order
       return await Order.findById(orderId);
 
     } catch (error) {

@@ -177,8 +177,9 @@ class Order {
   }
 
   // Update order status
-  static async updateStatus(orderId, status) {
-    await db.query(
+  static async updateStatus(orderId, status, connection = null) {
+    const conn = connection || db;
+    await conn.query(
       'UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?',
       [status, orderId]
     );
@@ -194,18 +195,39 @@ class Order {
   }
 
   // Decrease variant stock
-  static async decreaseStock(variantId, quantity) {
-    await db.query(
+  static async decreaseStock(variantId, quantity, connection = null) {
+    const conn = connection || db;
+    await conn.query(
       'UPDATE product_variants SET stock = stock - ? WHERE variant_id = ?',
       [quantity, variantId]
     );
   }
 
+  // Increase variant stock (for cancel)
+  static async increaseStock(variantId, quantity, connection = null) {
+    const conn = connection || db;
+    await conn.query(
+      'UPDATE product_variants SET stock = stock + ? WHERE variant_id = ?',
+      [quantity, variantId]
+    );
+  }
+
   // Log inventory change
-  static async logInventory(variantId, quantity, note) {
-    await db.query(
+  static async logInventory(variantId, quantity, note, connection = null) {
+    const conn = connection || db;
+    await conn.query(
       `INSERT INTO inventory_logs (variant_id, change_type, quantity, note) 
        VALUES (?, 'export', ?, ?)`,
+      [variantId, quantity, note]
+    );
+  }
+
+  // Log inventory import (for cancel)
+  static async logInventoryImport(variantId, quantity, note, connection = null) {
+    const conn = connection || db;
+    await conn.query(
+      `INSERT INTO inventory_logs (variant_id, change_type, quantity, note) 
+       VALUES (?, 'import', ?, ?)`,
       [variantId, quantity, note]
     );
   }
