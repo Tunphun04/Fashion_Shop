@@ -1,4 +1,4 @@
-✅ 1. Tạo bảng categories (đa cấp / multi-level)
+1. Tạo bảng categories (đa cấp / multi-level)
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     parent_id INT NULL,
@@ -17,11 +17,8 @@ CREATE TABLE categories (
 CREATE INDEX idx_categories_parent ON categories(parent_id);
 
 
-✔ Hỗ trợ đa cấp
-✔ parent_id tự tham chiếu
-✔ Nếu category cha bị xoá → con chuyển thành NULL
 
-✅ 2. Tạo bảng brands
+ 2. Tạo bảng brands
 CREATE TABLE brands (
     brand_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -33,10 +30,7 @@ CREATE TABLE brands (
 );
 
 
-✔ slug để SEO
-✔ brand độc lập với category
-
-✅ 3. Tạo bảng products
+ 3. Tạo bảng products
 CREATE TABLE products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
@@ -64,11 +58,7 @@ CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_products_brand ON products(brand_id);
 
 
-✔ Mỗi product thuộc 1 category
-✔ Có thể có hoặc không có brand
-✔ DELETE CASCADE nếu category xoá → product cũng xoá
-
-✅ 4. Tạo bảng product_variants
+ 4. Tạo bảng product_variants
 
 Product có nhiều biến thể (size / color / stock / SKU)
 
@@ -92,12 +82,7 @@ CREATE TABLE product_variants (
 CREATE INDEX idx_variant_product ON product_variants(product_id);
 
 
-✔ SKU unique
-✔ Mỗi product có nhiều variants
-✔ Stock được quản lý ở đây
-✔ Khi xoá product sẽ xoá luôn biến thể
-
-✅ 5. Tạo bảng product_images (nhiều ảnh)
+5. Tạo bảng product_images (nhiều ảnh)
 CREATE TABLE product_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -119,10 +104,7 @@ CREATE INDEX idx_image_product ON product_images(product_id);
 CREATE INDEX idx_image_variant ON product_images(variant_id);
 
 
-✔ Ảnh có thể gắn với product hoặc variant
-✔ is_main = 1 → ảnh chính
-
-✅ 6. Tạo bảng inventory_logs (theo dõi nhập/xuất kho)
+ 6. Tạo bảng inventory_logs (theo dõi nhập/xuất kho)
 CREATE TABLE inventory_logs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     variant_id INT NOT NULL,
@@ -139,20 +121,9 @@ CREATE TABLE inventory_logs (
 CREATE INDEX idx_inventory_variant ON inventory_logs(variant_id);
 
 
-✔ Ghi log khi
+ USERS & CUSTOMER
+ 1. user_roles (nếu muốn phân quyền chi tiết)
 
-Nhập hàng
-
-Xuất hàng
-
-Điều chỉnh thủ công (adjust stock)
-
-✔ Không quản lý stock ở đây → chỉ log → stock nằm ở product_variants
-
-2️⃣ USERS & CUSTOMER
-📌 1. user_roles (nếu muốn phân quyền chi tiết)
-
-Ví dụ: admin, customer, staff
 
 CREATE TABLE user_roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -160,7 +131,7 @@ CREATE TABLE user_roles (
     description TEXT
 );
 
-📌 2. users – thông tin khách hàng / admin
+ 2. users – thông tin khách hàng / admin
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     role_id INT DEFAULT 1, -- mặc định là customer
@@ -178,10 +149,7 @@ CREATE TABLE users (
 );
 
 
-✔ Lý do dùng password_hash: bảo mật
-✔ role_id liên kết user → role (admin, customer)
-
-📌 3. addresses – nhiều địa chỉ của 1 user (1:N)
+ 3. addresses – nhiều địa chỉ của 1 user (1:N)
 CREATE TABLE addresses (
     address_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -201,11 +169,8 @@ CREATE TABLE addresses (
         FOREIGN KEY (user_id) REFERENCES users(user_id)
         ON DELETE CASCADE
 );
-✔ Một user có thể có nhiều địa chỉ
-✔ ON DELETE CASCADE: nếu user bị xoá → xoá luôn địa chỉ
-
-✅ 3️⃣ SHOPPING CART MODULE
-📌 4. carts – giỏ hàng của 1 user (1:1)
+ SHOPPING CART MODULE
+ 4. carts – giỏ hàng của 1 user (1:1)
 
 → Mỗi user chỉ có 1 cart (chuẩn ecommerce)
 
@@ -221,9 +186,7 @@ CREATE TABLE carts (
 );
 
 
-✔ user_id UNIQUE đảm bảo mỗi user chỉ có 1 cart.
-
-📌 5. cart_items – danh sách sản phẩm trong cart (1 cart : nhiều item)
+ 5. cart_items – danh sách sản phẩm trong cart (1 cart : nhiều item)
 
 → Liên kết với product_variants vì mỗi item phải có size/color cụ thể.
 
@@ -243,10 +206,7 @@ CREATE TABLE cart_items (
 );
 
 
-✔ Nếu xoá cart → xoá luôn item
-✔ Liên kết product_variants → quản lý size/color/stock chuẩn
-
-✅ 1. CREATE TABLE orders
+ 1. CREATE TABLE orders
 CREATE TABLE orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -271,7 +231,7 @@ CREATE TABLE orders (
         FOREIGN KEY (address_id) REFERENCES addresses(address_id)
 );
 
-🔍 Giải thích:
+ Giải thích:
 
 status chuyển qua các giai đoạn: pending → paid → shipping → completed
 
@@ -279,7 +239,7 @@ payment_method lưu phương thức người dùng chọn
 
 address_id dùng để log địa chỉ giao hàng tại thời điểm checkout
 
-✅ 2. CREATE TABLE order_items
+ 2. CREATE TABLE order_items
 CREATE TABLE order_items (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -296,13 +256,12 @@ CREATE TABLE order_items (
         FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
 );
 
-🔍 Giải thích:
-
+ Giải thích:
 price là giá tại thời điểm đặt (giá trong tương lai thay đổi không ảnh hưởng)
 
 ON DELETE CASCADE: xoá order thì item cũng xoá theo
 
-✅ 3. CREATE TABLE payments
+ 3. CREATE TABLE payments
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -320,13 +279,13 @@ CREATE TABLE payments (
         ON DELETE CASCADE
 );
 
-🔍 Giải thích:
+ Giải thích:
 
 Một order có thể có nhiều payment (retry nhiều lần)
 
 transaction_id dùng cho MoMo/ZaloPay/VNPAY
 
-✅ 4. CREATE TABLE shipping
+ 4. CREATE TABLE shipping
 CREATE TABLE shipping (
     shipping_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -345,7 +304,7 @@ CREATE TABLE shipping (
         ON DELETE CASCADE
 );
 
-5️⃣ REVIEWS & WISHLIST
+5️ REVIEWS & WISHLIST
 1. reviews – đánh giá sản phẩm
 CREATE TABLE reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -367,7 +326,7 @@ CREATE TABLE reviews (
         ON DELETE CASCADE
 );
 
-✔ Giải thích:
+Giải thích:
 
 Mỗi user đánh giá một product.
 
@@ -384,7 +343,6 @@ CREATE TABLE wishlist (
         ON DELETE CASCADE
 );
 
-✔ Mỗi user chỉ có 1 wishlist, nên dùng UNIQUE.
 3. wishlist_items – sản phẩm trong wishlist (1 wishlist : N items)
 CREATE TABLE wishlist_items (
     wishlist_item_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -401,7 +359,7 @@ CREATE TABLE wishlist_items (
         ON DELETE CASCADE
 );
 
-✅ 6️⃣ PROMOTIONS / DISCOUNTS
+6 PROMOTIONS / DISCOUNTS
 1. coupons – lưu mã giảm giá
 CREATE TABLE coupons (
     coupon_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -419,7 +377,7 @@ CREATE TABLE coupons (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-✔ Ví dụ:
+ Ví dụ:
 
 SALE20 → percentage + 20%
 
