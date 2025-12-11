@@ -6,6 +6,7 @@ const categoryRoutes = require('./category.routes');
 const brandRoutes = require('./brand.routes');
 const cartRoutes = require('./cart.routes');
 const orderRoutes = require('./order.routes');
+const reviewRoutes = require('./review.routes');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -14,6 +15,7 @@ router.use('/categories', categoryRoutes);
 router.use('/brands', brandRoutes);
 router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
+router.use('/reviews', reviewRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
