@@ -1,3 +1,4 @@
+const { calculateVariantFinalPrice } = require('../utils/price.util');
 const Product = require('../models/product.model');
 const Category = require('../models/category.model');
 const Brand = require('../models/brand.model');
@@ -18,7 +19,10 @@ class ProductService {
     }
 
     // Get variants
-    const variants = await Product.findVariants(productId);
+    const variants = (await Product.findVariants(productId)).map(v => ({
+      ...v,
+      final_price: calculateVariantFinalPrice(v)
+    }));
     
     // Get images
     const images = await Product.findImages(productId);
@@ -45,7 +49,10 @@ class ProductService {
     }
 
     // Get variants
-    const variants = await Product.findVariants(product.product_id);
+    const variants = (await Product.findVariants(product.product_id)).map(v => ({
+      ...v,
+      final_price: calculateVariantFinalPrice(v)
+    }));
     
     // Get images
     const images = await Product.findImages(product.product_id);

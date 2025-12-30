@@ -4,85 +4,11 @@ import { ChevronDown } from "lucide-react";
 export default function Filter({className}){
   const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
   const BRANDS = ['LV']
-  const CATEGORIES = ['PAN'];
   const location = useLocation();
 
-  const isHome =
-  location.pathname === "/" || location.pathname === "/home";
+ 
 
-  function CategoryFilter({ onChange }) {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState([]);
-  const ref = useRef(null);
-
-  // đóng khi click ngoài
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  function toggleSize(size) {
-    setSelected((prev) => {
-      const next = prev.includes(size)
-        ? prev.filter((s) => s !== size)
-        : [...prev, size];
-
-      onChange?.(next);
-      return next;
-    });
-  }
-
-  return (
-    <div ref={ref} className="relative w-20">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex flex-row w-15 items-center justify-between align-middle
-        py-3 font-medium"
-      >
-        <span>
-          Category
-          {selected.length > 0 && (
-            <span className=" flex flex-col ml-2 text-sm text-gray-500">
-              ({selected.join(", ")})
-            </span>
-          )}
-        </span>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-
-      {/* DROPDOWN */}
-      {open && (
-        <div className="absolute mt-3 grid grid-cols-2 gap-2">
-          {CATEGORIES.map((size) => (
-            <button
-              key={size}
-              onClick={() => toggleSize(size)}
-              className={`border px-2 text-sm transition
-              ${
-                selected.includes(size)
-                  ? "bg-black text-white border-black"
-                  : "hover:border-black"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
+  
 
   function SizeFilter({ onChange }) {
   const [open, setOpen] = useState(false);
@@ -353,13 +279,7 @@ function PriceRangeFilter({
       Filter by:
     </span>
 
-    {isHome && (
-      <CategoryFilter
-        onChange={(categories) => {
-          console.log("Selected category:", categories);
-        }}
-      />
-    )}
+  
 
     <SizeFilter
       onChange={(sizes) => {

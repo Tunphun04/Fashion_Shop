@@ -8,6 +8,7 @@ const productController = {
     const filters = {
       page: req.query.page,
       limit: req.query.limit,
+      category_slug: req.query.category_slug,
       category_id: req.query.category_id,
       brand_id: req.query.brand_id,
       min_price: req.query.min_price,

@@ -28,28 +28,56 @@ class Cart {
 
     const [items] = await db.query(`
       SELECT 
-        ci.cart_item_id,
-        ci.variant_id,
-        ci.quantity,
-        p.product_id,
-        p.name as product_name,
-        p.slug as product_slug,
-        pv.sku,
-        pv.color,
-        pv.size,
-        pv.price,
-        pv.stock,
-        b.name as brand_name,
-        (SELECT image_url FROM product_images 
-         WHERE product_id = p.product_id AND is_main = 1 
-         LIMIT 1) as image_url,
-        (ci.quantity * pv.price) as subtotal
-      FROM cart_items ci
-      JOIN product_variants pv ON ci.variant_id = pv.variant_id
-      JOIN products p ON pv.product_id = p.product_id
-      LEFT JOIN brands b ON p.brand_id = b.brand_id
-      WHERE ci.cart_id = ?
-      ORDER BY ci.created_at DESC
+      ci.cart_item_id,
+      ci.variant_id,
+      ci.quantity,
+
+      p.product_id,
+      p.name as product_name,
+      p.slug as product_slug,
+
+      pv.sku,
+      pv.color,
+      pv.size,
+
+      pv.price AS original_price,
+      pv.sale_price,
+      pv.sale_percent,
+      pv.is_on_sale,
+      pv.sale_start,
+      pv.sale_end,
+
+      CASE
+        WHEN pv.is_on_sale = 1
+        AND pv.sale_price IS NOT NULL
+        AND NOW() BETWEEN pv.sale_start AND pv.sale_end
+        THEN pv.sale_price
+        ELSE pv.price
+      END AS price,
+
+      pv.stock,
+      b.name as brand_name,
+
+      (SELECT image_url FROM product_images 
+      WHERE product_id = p.product_id AND is_main = 1 
+      LIMIT 1) as image_url,
+
+      ci.quantity * (
+        CASE
+          WHEN pv.is_on_sale = 1
+          AND pv.sale_price IS NOT NULL
+          AND NOW() BETWEEN pv.sale_start AND pv.sale_end
+          THEN pv.sale_price
+          ELSE pv.price
+        END
+      ) AS subtotal
+
+    FROM cart_items ci
+    JOIN product_variants pv ON ci.variant_id = pv.variant_id
+    JOIN products p ON pv.product_id = p.product_id
+    LEFT JOIN brands b ON p.brand_id = b.brand_id
+    WHERE ci.cart_id = ?
+    ORDER BY ci.created_at DESC
     `, [cartId]);
 
     // Calculate totals

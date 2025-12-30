@@ -1,10 +1,22 @@
+const { calculateVariantFinalPrice } = require('../utils/price.util');
 const Cart = require('../models/cart.model');
 const ApiError = require('../utils/ApiError');
 
 class CartService {
   // Get user's cart
   static async getCart(userId) {
-    return await Cart.getCartWithItems(userId);
+    const cart = await Cart.getCartWithItems(userId);
+
+    cart.items = cart.items.map(item => {
+      const final_price = calculateVariantFinalPrice(item);
+      return {
+        ...item,
+        final_price,
+        subtotal: final_price * item.quantity
+      };
+    });
+
+    return cart;
   }
 
   // Add item to cart

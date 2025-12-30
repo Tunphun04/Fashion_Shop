@@ -1,8 +1,13 @@
 import { IMAGE_BASE_URL } from "../../constant/env"
+
 export default function ProductCard({ product }) {
-    const imageUrl = product.main_image
-    ? `${IMAGE_BASE_URL}${product.main_image}`
+  const imageUrl = product.main_image
+    ? product.main_image.startsWith("http")
+      ? product.main_image
+      : `${IMAGE_BASE_URL}${product.main_image}`
     : "/no-image.png"
+
+  const isOnSale = product.is_on_sale === 1
 
   return (
     <article
@@ -20,20 +25,40 @@ export default function ProductCard({ product }) {
           e.target.src = "/no-image.png"
         }}
       />
-      <div >
+
+      <div>
         <h3 className="mt-2 font-semibold">
-        {product.name}
-      </h3>
+          {product.name}
+        </h3>
 
-      <p className="text-sm text-gray-500">
-        {product.brand_name}
-      </p>
+        <p className="text-sm text-gray-500">
+          {product.brand_name}
+        </p>
 
-      <p className="text-red-600 font-bold mt-1">
-        {product.price.toLocaleString()} đ
-      </p>
+        {/* PRICE */}
+        {isOnSale ? (
+          <div className="flex flex-row mt-1 items-center">
+            {/* Giá gốc */}
+            <span className="text-sm text-gray-400 line-through mr-2">
+              {Number(product.original_price).toLocaleString()} đ
+            </span>
+
+            {/* % sale */}
+            <span className="text-xs bg-red-100 text-red-600 font-semibold rounded ">
+              -{product.sale_percent}%
+            </span>
+
+            {/* Giá đang bán (price = sale price) */}
+            <p className="text-red-600 font-bold text-lg mt-1 ml-2">
+              {Number(product.price).toLocaleString()} đ
+            </p>
+          </div>
+        ) : (
+          <p className="text-red-600 font-bold mt-1">
+            {Number(product.price).toLocaleString()} đ
+          </p>
+        )}
       </div>
-      
     </article>
   )
 }

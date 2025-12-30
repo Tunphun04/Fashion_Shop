@@ -1,3 +1,4 @@
+const { calculateVariantFinalPrice } = require('../utils/price.util');
 const Order = require('../models/order.model');
 const Cart = require('../models/cart.model');
 const db = require('../config/database');
@@ -39,11 +40,21 @@ class OrderService {
     const shipping_fee = PaymentService.calculateShippingFee(address.city);
 
     // Calculate totals
-    const subtotal = parseFloat(cart.total_amount);
+    let subtotal = 0;
+
+    const items = cart.items.map(item => {
+      const final_price = calculateVariantFinalPrice(item);
+      subtotal += final_price * item.quantity;
+
+      return {
+        ...item,
+        price: final_price
+      };
+    });
     const total = subtotal + shipping_fee;
 
     return {
-      items: cart.items,
+      items,
       subtotal: subtotal.toFixed(2),
       shipping_fee: shipping_fee.toFixed(2),
       total: total.toFixed(2),

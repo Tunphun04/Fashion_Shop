@@ -8,11 +8,22 @@ import Home from "../pages/Home";
 import MenWear from "../pages/products/MenWear";
 import WomenWear from "../pages/products/WomenWear";
 import KidWear from "../pages/products/KidWear";
+
 export default function MainLayout(){
     const [isSearching, setIsSearching] = useState(false);
     const containerRef = useRef(null); // chứa input + search view
+    const location = useLocation();
 
+    const isActive = (path) => {
+        return location.pathname === path || location.pathname.startsWith(path + "/");
+        };
+    const currentMainCategory =
+    location.pathname.startsWith("/men") ? "men" :
+    location.pathname.startsWith("/women") ? "women" :
+    location.pathname.startsWith("/kid") ? "kid" :
+    null;
  // Click outside để đóng search view
+
     useEffect(() => {
         function handleDocClick(e) {
         if (!containerRef.current) return;
@@ -42,9 +53,32 @@ export default function MainLayout(){
                         ? "opacity-0 -translate-y-5 pointer-events-none"
                         : "opacity-100 translate-y-0"
                     }`}>
-                    <a href="/men">Men</a>
-                    <a href="/women">Women</a>
-                    <a href="/kid">Kid</a>
+                    <Link
+                        to="/men"
+                        className={`pb-1 border-b-2 transition-all
+                            ${isActive("/men") ? "border-black" : "border-transparent hover:border-gray-400"}
+                        `}
+                        >
+                        Men
+                    </Link>
+
+                    <Link
+                        to="/women"
+                        className={`pb-1 border-b-2 transition-all
+                            ${isActive("/women") ? "border-black" : "border-transparent hover:border-gray-400"}
+                        `}
+                        >
+                        Women
+                    </Link>
+
+                    <Link
+                        to="/kid"
+                        className={`pb-1 border-b-2 transition-all
+                            ${isActive("/kid") ? "border-black" : "border-transparent hover:border-gray-400"}
+                        `}
+                        >
+                        Kid
+                    </Link>
                  </div>
                 <div className="text-4xl">
                         <a href="/">Style</a>
@@ -64,13 +98,24 @@ export default function MainLayout(){
                  <div className={`${isSearching ?"ml-0 flex-1" :"ml-20 gap-x-5 flex min-w-[300px] flex-1 "} `}>
                     <div className={`${isSearching ? "hidden" : "block"}`}>
                         <ul className="flex gap-x-5 h-10 items-center text-sm">
-                        <li><a href="">Clothing</a></li>
-                        <li><a href="">Shoes</a></li>
-                        <li><a href="">Bags</a></li>
-                        <li><a href="">Watches</a></li>
-                        <li><a href="">Jewelry</a></li>
-                        <li><a href="">Brands</a></li>
-                        </ul>
+                            {["clothing", "shoes", "bags", "watches", "jewelry", "brands"].map(item => {
+                                const path = `/${currentMainCategory}/${item}`;
+                                return (
+                                <li key={item}>
+                                    <Link
+                                    to={path}
+                                    className={`pb-1 border-b-2 capitalize transition-all
+                                        ${isActive(path)
+                                        ? "border-black"
+                                        : "border-transparent hover:border-gray-400"}
+                                    `}
+                                    >
+                                    {item}
+                                    </Link>
+                                </li>
+                                );
+                            })}
+                    </ul>
                     </div>
                     <div className={`w-full ${isSearching ? "block absolute z-10" : "hidden"}`}>
                         <SearchView isSearching={isSearching} />
