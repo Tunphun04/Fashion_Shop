@@ -1,43 +1,12 @@
 import { useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
 import { productApi } from "../../api/product.api"
-import Filter from "../common/filter"
 import ProductCard from "./ProductCard"
+import Filter from "../common/filter"
 
-export default function DisplayProducts() {
+export default function DisplayProducts({ categorySlug, showFilter = true }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const location = useLocation()
-  const pathname = location.pathname
-
-  const isHome = pathname === "/" || pathname === "/home"
-
-  // ===== PHÂN TÍCH URL =====
-  const pathParts = pathname.split("/").filter(Boolean)
-  // [] → home
-  // ["men"]
-  // ["men","clothing"]
-  // ["men","clothing","tshirts"]
-
-  let categorySlug = null
-
-  if (pathParts.length === 1) {
-    // /men
-    categorySlug = pathParts[0]
-  }
-
-  if (pathParts.length === 2) {
-    // /men/clothing
-    categorySlug = `${pathParts[0]}-${pathParts[1]}`
-  }
-
-  if (pathParts.length === 3) {
-    // /men/clothing/tshirts
-    categorySlug = `${pathParts[0]}-${pathParts[1]}-${pathParts[2]}`
-  }
-
-  // ===== FETCH PRODUCTS =====
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -62,9 +31,7 @@ export default function DisplayProducts() {
 
   return (
     <div className="px-20 mt-3 flex flex-col">
-
-      {/* CHỈ HIỆN FILTER KHI KHÔNG PHẢI HOME */}
-      {!isHome && <Filter categorySlug={categorySlug} />}
+      {showFilter && <Filter categorySlug={categorySlug} />}
 
       <section
         className="

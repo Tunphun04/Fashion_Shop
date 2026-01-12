@@ -4,6 +4,147 @@ class Product {
   // ================================
   // GET PRODUCTS (LIST + FILTER)
   // ================================
+
+  static async findBySlug(slug) {
+  const query = `
+    SELECT
+      p.product_id,
+      p.name,
+      p.slug,
+      p.description,
+      p.status,
+      p.created_at,
+      c.name AS category_name,
+      c.slug AS category_slug,
+      b.name AS brand_name,
+      b.slug AS brand_slug,
+      (
+        SELECT image_url
+        FROM product_images
+        WHERE product_id = p.product_id AND is_main = 1
+        LIMIT 1
+      ) AS main_image,
+      MIN(pv.price) AS original_price,
+      MIN(
+        CASE
+          WHEN pv.is_on_sale = 1
+           AND NOW() BETWEEN pv.sale_start AND pv.sale_end
+          THEN pv.sale_price
+          ELSE pv.price
+        END
+      ) AS price,
+      MAX(
+        CASE
+          WHEN pv.is_on_sale = 1
+           AND NOW() BETWEEN pv.sale_start AND pv.sale_end
+          THEN pv.sale_percent
+          ELSE 0
+        END
+      ) AS sale_percent,
+      MAX(
+        CASE
+          WHEN pv.is_on_sale = 1
+           AND NOW() BETWEEN pv.sale_start AND pv.sale_end
+          THEN 1
+          ELSE 0
+        END
+      ) AS is_on_sale
+    FROM products p
+    JOIN product_variants pv ON p.product_id = pv.product_id
+    LEFT JOIN categories c ON p.category_id = c.category_id
+    LEFT JOIN brands b ON p.brand_id = b.brand_id
+    WHERE p.slug = ? AND p.status = 'active'
+    GROUP BY p.product_id
+    LIMIT 1
+  `;
+
+  const [rows] = await db.query(query, [slug]);
+  return rows[0] || null;
+}
+  static async findById(productId) {
+  const query = `
+    SELECT
+      p.*,
+      c.name AS category_name,
+      c.slug AS category_slug,
+      b.name AS brand_name,
+      b.slug AS brand_slug
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.category_id
+    LEFT JOIN brands b ON p.brand_id = b.brand_id
+    WHERE p.product_id = ?
+    LIMIT 1
+  `;
+  
+  const [rows] = await db.query(query, [productId]);
+  return rows[0] || null;
+}
+
+// Method findVariants
+static async findVariants(productId) {
+  const query = `
+    SELECT *
+    FROM product_variants
+    WHERE product_id = ?
+  `;
+  
+  const [rows] = await db.query(query, [productId]);
+  return rows;
+}
+
+// Method findImages
+static async findImages(productId, variantId = null) {
+  let query = `
+    SELECT *
+    FROM product_images
+    WHERE product_id = ?
+  `;
+  
+  const params = [productId];
+  
+  if (variantId) {
+    query += ` AND variant_id = ?`;
+    params.push(variantId);
+  }
+  
+  query += ` ORDER BY is_main DESC, image_id ASC`;
+  
+  const [rows] = await db.query(query, params);
+  return rows;
+}
+
+// Method getAvailableColors
+static async getAvailableColors(productId) {
+  const query = `
+    SELECT DISTINCT color
+    FROM product_variants
+    WHERE product_id = ? AND stock > 0
+    ORDER BY color
+  `;
+  
+  const [rows] = await db.query(query, [productId]);
+  return rows.map(r => r.color);
+}
+
+// Method getAvailableSizes
+static async getAvailableSizes(productId) {
+  const query = `
+    SELECT DISTINCT size
+    FROM product_variants
+    WHERE product_id = ? AND stock > 0
+    ORDER BY size
+  `;
+  
+  const [rows] = await db.query(query, [productId]);
+  return rows.map(r => r.size);
+}
+
+// Method exists
+static async exists(productId) {
+  const query = `SELECT 1 FROM products WHERE product_id = ? LIMIT 1`;
+  const [rows] = await db.query(query, [productId]);
+  return rows.length > 0;
+}
   static async findAll(filters = {}) {
     const {
       page = 1,

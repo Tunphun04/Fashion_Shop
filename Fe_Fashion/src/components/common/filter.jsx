@@ -2,8 +2,8 @@ import { useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 export default function Filter({className}){
-  const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-  const BRANDS = ['LV']
+  const SIZES = []; // size cloting và size shoes,.. khác nhau tùy theo categories
+  const BRANDS = [] //lấy từ DB tùy theo categories  
   const location = useLocation();
 
  

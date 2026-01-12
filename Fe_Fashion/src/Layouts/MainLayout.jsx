@@ -3,12 +3,11 @@ import Footer from "../components/common/footer";
 import { useState, useRef, useEffect } from "react"
 import {UserCircle, Heart, ShoppingCart} from 'lucide-react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
-import DisplayProducts from "../components/products/DisplayProducts";
 import Home from "../pages/Home";
 import MenWear from "../pages/products/MenWear";
 import WomenWear from "../pages/products/WomenWear";
 import KidWear from "../pages/products/KidWear";
-
+import ProductDetail from "../pages/products/ProductDetail";
 export default function MainLayout(){
     const [isSearching, setIsSearching] = useState(false);
     const containerRef = useRef(null); // chứa input + search view
@@ -46,7 +45,8 @@ export default function MainLayout(){
     
     return(
         <main className="flex flex-col">
-            <nav className={`flex justify-between items-center h-18 font-bold text-base font-serif transition-all duration-500
+            <div className="fixed top-0 left-0 right-0 z-50 bg-white">
+                <nav className={`flex justify-between items-center h-18 font-bold text-base font-serif transition-all duration-500
                 `}>
                 <div className={`flex ml-20 gap-x-5 transition-all duration-500 ease-in-out transform ${
                     isSearching
@@ -98,7 +98,7 @@ export default function MainLayout(){
                  <div className={`${isSearching ?"ml-0 flex-1" :"ml-20 gap-x-5 flex min-w-[300px] flex-1 "} `}>
                     <div className={`${isSearching ? "hidden" : "block"}`}>
                         <ul className="flex gap-x-5 h-10 items-center text-sm">
-                            {["clothing", "shoes", "bags", "watches", "jewelry", "brands"].map(item => {
+                            {["clothing", "shoes", "bags", "watches", "jewelry", ].map(item => {
                                 const path = `/${currentMainCategory}/${item}`;
                                 return (
                                 <li key={item}>
@@ -133,13 +133,26 @@ export default function MainLayout(){
                 
                 
             </nav>
+            </div>
             <Routes>
                 <Route path="/" element={<Home />} />
+
                 <Route path="/men" element={<MenWear />} />
+                <Route path="/men/:group" element={<MenWear />} />
+                <Route path="/men/:group/:type" element={<MenWear />} />
+
                 <Route path="/women" element={<WomenWear />} />
+                <Route path="/women/:group" element={<WomenWear />} />
+                <Route path="/women/:group/:type" element={<WomenWear />} />
+
                 <Route path="/kid" element={<KidWear />} />
-            </Routes>
-            <DisplayProducts/>
+                <Route path="/kid/:group" element={<KidWear />} />
+                <Route path="/kid/:group/:type" element={<KidWear />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
+
+             </Routes>
+
+           
             <Footer></Footer>
         </main>
         
